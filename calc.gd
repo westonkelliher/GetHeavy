@@ -32,7 +32,7 @@ func _get_downward_vector(world_x: float, world_z: float, non_limit_dist: float,
 	# TODO: choose the first point in the xz direction of velocity
 	var py: float = get_ground_y(world_x, world_z)
 	var p: Vector3 = Vector3(world_x, py, world_z)
-	print(p)
+	#print(p)
 	# a
 	var thetq: Vector3 = Vector3.FORWARD * non_limit_dist
 	var a: Vector3 = p + thetq
@@ -57,6 +57,6 @@ func _get_downward_vector(world_x: float, world_z: float, non_limit_dist: float,
 	# debug
 	player.set_debug_points([a, b, c, p])
 	#
-	print('--- ' + str(down_proj.normalized()) + ' ---')
+	#print('--- ' + str(down_proj.normalized()) + ' ---')
 	return down_proj.normalized()
 	

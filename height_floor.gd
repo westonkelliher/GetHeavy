@@ -1,17 +1,17 @@
 extends StaticBody3D
 
-@export var amplitude: float  = 8.0                  # ± height (metres)
+@export var amplitude: float  = 12.0                  # ± height (metres)
 @export var size:      Vector2i = Vector2i(256, 256)  # height‑map resolution
 
 signal terrain_ready
 
-const VERTICE_SPACING := 1.1
+const VERTICE_SPACING := 0.5
 
 func noise_init_heights(s: float = amplitude) -> void:
 	# 1. Build noise → Image --------------------------------------------------
 	var noise := FastNoiseLite.new()
-	noise.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
-	noise.frequency  = 0.008
+	noise.noise_type = FastNoiseLite.TYPE_CELLULAR
+	noise.frequency  = 0.01
 	noise.seed       = randi()
 
 	var tex := NoiseTexture2D.new()

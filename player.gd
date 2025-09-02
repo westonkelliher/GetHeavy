@@ -5,8 +5,8 @@ extends CharacterBody3D
 const HIGH_GRAV := 10.0
 const LOW_GRAV := 3.0
 
-const HIGH_FRIC := 0.12
-const LOW_FRIC := 0.07
+const HIGH_FRIC := 0.005
+const LOW_FRIC := 0.1
 
 var is_heavy := false
 
@@ -18,7 +18,7 @@ func get_cam_node() -> Node3D:
 
 func _process(delta: float) -> void:
 	# set debug ray pointing down gradient
-	print(global_position)
+	#print(global_position)
 	#$Debug/Ray.global_position = Vector3($M.global_position.x, .3, $M.global_position.z)
 	pass
 
@@ -34,9 +34,21 @@ func _input(event: InputEvent) -> void:
 #### Physics ####
 func _physics_process(delta: float) -> void:
 	#velocity = Vector3.FORWARD
+	# TODO: handle momentum change when hitting the floor
+	phys_snap_help(delta)
 	phys_grav(delta)
 	move_and_slide()
+	#if is_on_floor():
+		#apply_floor_snap()
 	phys_friction(delta)
+
+func phys_snap_help(delta: float) -> void:
+	if is_heavy:
+		self.floor_snap_length = 0.4
+	elif velocity.normalized().dot(Vector3.DOWN) > 0.3:
+		self.floor_snap_length = 0.02
+	else:
+		self.floor_snap_length = 0.0
 
 func phys_grav(delta: float) -> void:
 	var grav := LOW_GRAV
