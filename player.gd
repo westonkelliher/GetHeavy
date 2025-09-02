@@ -8,6 +8,8 @@ const LOW_GRAV := 3.0
 const HIGH_FRIC := 0.005
 const LOW_FRIC := 0.1
 
+const RELEASE_BOOST := 0.4
+
 var is_heavy := false
 
 func _ready() -> void:
@@ -25,10 +27,13 @@ func _process(delta: float) -> void:
 
 
 func _input(event: InputEvent) -> void:
+	const rb = RELEASE_BOOST
 	if Input.is_action_just_pressed("heavy"):
 		is_heavy = true
+		velocity *= velocity.length() / (velocity.length() + rb)
 	if Input.is_action_just_released("heavy"):
 		is_heavy = false
+		velocity *= (velocity.length() + rb) / velocity.length()
 
 
 #### Physics ####
