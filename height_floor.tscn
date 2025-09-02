@@ -8,6 +8,7 @@
 [sub_resource type="PlaneMesh" id="PlaneMesh_ca6xm"]
 
 [node name="HeightFloor" type="StaticBody3D"]
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0)
 script = ExtResource("1_nt3s1")
 
 [node name="Shape" type="CollisionShape3D" parent="."]

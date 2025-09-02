@@ -2,8 +2,8 @@ class_name Player
 extends CharacterBody3D
 
 
-const HIGH_GRAV := 11
-const LOW_GRAV := 5.0
+const HIGH_GRAV := 10.0
+const LOW_GRAV := 3.0
 
 const HIGH_FRIC := 0.12
 const LOW_FRIC := 0.07
@@ -47,6 +47,8 @@ func phys_grav(delta: float) -> void:
 		velocity += Vector3.DOWN*grav*delta
 	else:
 		var downhill := Calc.get_downward_vector(global_position.x, global_position.z)
+		if downhill.length() == 0:
+			return
 		var dh_acc := downhill * downhill.dot(Vector3.DOWN) * grav
 		$Debug/Ray.target_position = dh_acc * 0.5/sqrt(dh_acc.length())
 		velocity += dh_acc * delta

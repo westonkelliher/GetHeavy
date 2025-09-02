@@ -50,7 +50,10 @@ func _get_downward_vector(world_x: float, world_z: float, non_limit_dist: float,
 	if tang_norm.y > 0:
 		tang_norm = -tang_norm
 	# projection of DOWN onto the plane
-	var down_proj: Vector3 = Vector3.DOWN - tang_norm.dot(Vector3.DOWN) * tang_norm
+	var dot := tang_norm.dot(Vector3.DOWN)
+	if dot > 0.999:
+		return Vector3.ZERO
+	var down_proj: Vector3 = Vector3.DOWN - dot * tang_norm
 	# debug
 	player.set_debug_points([a, b, c, p])
 	#
