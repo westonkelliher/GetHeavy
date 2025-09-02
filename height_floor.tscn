@@ -1,0 +1,19 @@
+[gd_scene load_steps=5 format=3 uid="uid://cggyho1wc1osu"]
+
+[ext_resource type="Script" uid="uid://b2q5fw4dan5re" path="res://height_floor.gd" id="1_nt3s1"]
+[ext_resource type="Material" uid="uid://b4aeadprr7tq3" path="res://assets/height_floor.tres" id="2_ys3id"]
+
+[sub_resource type="HeightMapShape3D" id="HeightMapShape3D_nt3s1"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_ca6xm"]
+
+[node name="HeightFloor" type="StaticBody3D"]
+script = ExtResource("1_nt3s1")
+
+[node name="Shape" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.000507355, -0.0187788, 0.00323677)
+shape = SubResource("HeightMapShape3D_nt3s1")
+
+[node name="Mesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("PlaneMesh_ca6xm")
+surface_material_override/0 = ExtResource("2_ys3id")

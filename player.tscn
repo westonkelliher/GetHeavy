@@ -1,0 +1,91 @@
+[gd_scene load_steps=12 format=3 uid="uid://kwdxei0hwcaj"]
+
+[ext_resource type="Script" uid="uid://bwx6oedgihcku" path="res://player.gd" id="1_4flbx"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4flbx"]
+transparency = 1
+albedo_color = Color(0, 1, 1, 0.392157)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_4flbx"]
+material = SubResource("StandardMaterial3D_4flbx")
+radius = 0.02
+height = 0.05
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_onrkg"]
+transparency = 1
+albedo_color = Color(1, 0, 1, 0.392157)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_i3pqv"]
+material = SubResource("StandardMaterial3D_onrkg")
+radius = 0.02
+height = 0.05
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hqtel"]
+transparency = 1
+albedo_color = Color(1, 1, 0, 0.392157)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_sweqy"]
+material = SubResource("StandardMaterial3D_hqtel")
+radius = 0.02
+height = 0.05
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_i3pqv"]
+transparency = 1
+albedo_color = Color(0, 0, 0, 0.392157)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_hqtel"]
+material = SubResource("StandardMaterial3D_i3pqv")
+radius = 0.02
+height = 0.05
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_4flbx"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_4flbx"]
+
+[node name="Player" type="CharacterBody3D"]
+floor_max_angle = 1.5708
+script = ExtResource("1_4flbx")
+
+[node name="Q" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+
+[node name="SpringArm" type="SpringArm3D" parent="Q"]
+spring_length = 3.0
+
+[node name="Cam" type="Node3D" parent="Q/SpringArm"]
+
+[node name="Debug" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
+
+[node name="Ray" type="RayCast3D" parent="Debug"]
+target_position = Vector3(0, 0, -1)
+
+[node name="Marks" type="Node3D" parent="Debug"]
+
+[node name="A" type="MeshInstance3D" parent="Debug/Marks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0921244, 0, 0)
+mesh = SubResource("CapsuleMesh_4flbx")
+skeleton = NodePath("../..")
+
+[node name="B" type="MeshInstance3D" parent="Debug/Marks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0996916, 0, 0)
+mesh = SubResource("CapsuleMesh_i3pqv")
+skeleton = NodePath("../..")
+
+[node name="C" type="MeshInstance3D" parent="Debug/Marks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.105529)
+mesh = SubResource("CapsuleMesh_sweqy")
+skeleton = NodePath("../..")
+
+[node name="Q1" type="MeshInstance3D" parent="Debug/Marks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.165115, 0, 0.105529)
+mesh = SubResource("CapsuleMesh_hqtel")
+skeleton = NodePath("../..")
+
+[node name="Shape" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_4flbx")
+
+[node name="Mesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+visible = false
+mesh = SubResource("SphereMesh_4flbx")

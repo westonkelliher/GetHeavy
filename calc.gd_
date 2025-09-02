@@ -1,0 +1,54 @@
+extends Node
+
+
+var player: Node3D = null
+
+func projectile_pos_at_time(start_pos:Vector3,start_vel:Vector3,gravity:Vector3,t:float)->Vector3:
+	return start_pos+start_vel*t+0.5*gravity*(t*t)
+
+#func estimate_landing_y(start_pos:Vector3, start_vel:Vector3, gravity:Vector3)->float:
+	#return _estimate_landing_y()
+
+func estimate_landing_y(start_pos:Vector3, start_vel:Vector3,
+						gravity:Vector3, coarse_dt:=0.1,fine_dt:=0.01,
+						epsilon:=0.002,max_time:=60.0)->float:
+	var t:=0.0
+	var dt:=coarse_dt
+	var last_pos:=start_pos
+	var last_diff: float = start_pos.y-get_ground_y(start_pos.x,start_pos.z)
+	while t<max_time:
+		t+=dt
+		var pos:=projectile_pos_at_time(start_pos,start_vel,gravity,t)
+		var ground_y: float = get_ground_y(pos.x,pos.z)
+		var diff:=pos.y-ground_y
+		if diff<=0.0:
+			if dt==fine_dt:
+				var alpha: float =last_diff/(last_diff-diff)
+				var impact_x: float =lerp(last_pos.x,pos.x,alpha)
+				var impact_z: float =lerp(last_pos.z,pos.z,alpha)
+				return get_ground_y(impact_x,impact_z)
+			t-=dt
+			dt=fine_dt
+			continue
+		if abs(diff)<=epsilon and dt==fine_dt:
+			return ground_y
+		last_pos=pos
+		last_diff=diff
+	return -INF
+
+
+
+var world_3d: World3D = null # set by world.gd
+
+func get_ground_y(world_x: float, world_z: float, exclude := [], max_height := 1_000.0) -> float:
+	var space := world_3d.direct_space_state
+	# Build the parameter object in one line.
+	var params := PhysicsRayQueryParameters3D.create(
+		Vector3(world_x, -1000,  world_z),    # from
+		Vector3(world_x,  1000,  world_z),   # to
+	)
+	params.collide_with_bodies = true   # default, but explicit reads clearer
+	params.collide_with_areas  = false  # skip Area3D triggers; set true if needed
+	params.exclude = exclude
+	var hit := space.intersect_ray(params)   # single‑arg call in 4.x  :contentReference[oaicite:0]{index=0}
+	return hit.position.y if hit else 0.0    # put the player a small margin above
