@@ -1,6 +1,15 @@
-[gd_scene load_steps=12 format=3 uid="uid://kwdxei0hwcaj"]
+[gd_scene load_steps=15 format=3 uid="uid://kwdxei0hwcaj"]
 
 [ext_resource type="Script" uid="uid://bwx6oedgihcku" path="res://player.gd" id="1_4flbx"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sweqy"]
+transparency = 1
+albedo_color = Color(1, 1, 0, 0.392157)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_2hs0m"]
+material = SubResource("StandardMaterial3D_sweqy")
+radius = 0.04
+height = 0.1
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4flbx"]
 transparency = 1
@@ -42,6 +51,8 @@ height = 0.05
 
 [sub_resource type="SphereMesh" id="SphereMesh_4flbx"]
 
+[sub_resource type="SphereShape3D" id="SphereShape3D_onrkg"]
+
 [node name="Player" type="CharacterBody3D"]
 floor_max_angle = 1.5708
 script = ExtResource("1_4flbx")
@@ -50,7 +61,7 @@ script = ExtResource("1_4flbx")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 
 [node name="SpringArm" type="SpringArm3D" parent="Q"]
-spring_length = 3.0
+spring_length = 5.0
 
 [node name="Cam" type="Node3D" parent="Q/SpringArm"]
 
@@ -58,7 +69,15 @@ spring_length = 3.0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
 
 [node name="Ray" type="RayCast3D" parent="Debug"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.530375, 0)
 target_position = Vector3(0, 0, -1)
+
+[node name="Ray2" type="RayCast3D" parent="Debug"]
+target_position = Vector3(0, 0, -1)
+
+[node name="C" type="MeshInstance3D" parent="Debug/Ray2"]
+mesh = SubResource("CapsuleMesh_2hs0m")
+skeleton = NodePath("../..")
 
 [node name="Marks" type="Node3D" parent="Debug"]
 
@@ -89,3 +108,7 @@ shape = SubResource("SphereShape3D_4flbx")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 visible = false
 mesh = SubResource("SphereMesh_4flbx")
+
+[node name="Cast" type="ShapeCast3D" parent="."]
+shape = SubResource("SphereShape3D_onrkg")
+target_position = Vector3(0, 0.2, -0.4)

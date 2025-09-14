@@ -60,3 +60,14 @@ func _get_downward_vector(world_x: float, world_z: float, non_limit_dist: float,
 	#print('--- ' + str(down_proj.normalized()) + ' ---')
 	return down_proj.normalized()
 	
+
+
+# # # return theta (positive for up hill)
+func get_ground_slope_in_dir_at(dir_x: float, dir_z: float, world_x: float, world_z: float) -> float:
+	# just take two heights and do trig on the rise over run
+	var h1 := get_ground_y(world_x, world_z)
+	var h2 := get_ground_y(world_x + dir_x, world_z + dir_z)
+	var rise := h2 - h1
+	var run := Vector2(dir_x, dir_z).length()
+	return atan(rise/run)
+	

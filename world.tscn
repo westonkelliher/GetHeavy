@@ -1,8 +1,8 @@
 [gd_scene load_steps=8 format=3 uid="uid://c6bcxo8hc140d"]
 
 [ext_resource type="Script" uid="uid://bt6p33gc8jgjd" path="res://world.gd" id="1_aqk2v"]
-[ext_resource type="PackedScene" uid="uid://cggyho1wc1osu" path="res://height_floor.tscn" id="2_fj7yv"]
 [ext_resource type="PackedScene" uid="uid://dkebfqxf1ilwp" path="res://my_camera.tscn" id="2_tlwt5"]
+[ext_resource type="PackedScene" uid="uid://dmddvsb2d3rcu" path="res://terrain.tscn" id="4_036b0"]
 [ext_resource type="PackedScene" uid="uid://kwdxei0hwcaj" path="res://player.tscn" id="4_aqk2v"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_fj7yv"]
@@ -30,8 +30,6 @@ environment = SubResource("Environment_aqk2v")
 
 [node name="MyCamera" parent="." instance=ExtResource("2_tlwt5")]
 
-[node name="HeightFloor" parent="." instance=ExtResource("2_fj7yv")]
-
 [node name="Projectiles" type="Node3D" parent="."]
 
 [node name="Enemies" type="Node3D" parent="."]
@@ -53,5 +51,8 @@ theme_override_font_sizes/font_size = 40
 text = "Restart"
 
 [node name="Player" parent="." instance=ExtResource("4_aqk2v")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 50.9646, 0)
+
+[node name="Terrain" parent="." instance=ExtResource("4_036b0")]
 
 [connection signal="pressed" from="Button" to="." method="_on_button_pressed"]

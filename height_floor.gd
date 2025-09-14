@@ -1,6 +1,6 @@
 extends StaticBody3D
 
-@export var amplitude: float  = 10.0                  # ± height (metres)
+@export var amplitude: float  = 12.0                  # ± height (metres)
 @export var size:      Vector2i = Vector2i(256, 256)  # height‑map resolution
 
 signal terrain_ready
