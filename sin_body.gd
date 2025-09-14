@@ -33,9 +33,9 @@ func height_equation(x: float, y: float) -> float:
 	var b1 := noise_equation(x, y)
 	var v_course := v.rotated(PI/4)/6.0 + Vector2(20,20)
 	var b2 := noise_equation(v_course.x, v_course.y)
-	var v_fine := v.rotated(PI/3)*2.5  + Vector2(-20,20)
+	var v_fine := v.rotated(PI/3)*2.0  + Vector2(-20,20)
 	var b3 := noise_equation(v_fine.x, v_fine.y)
-	return b1 + 1.8*b2 + 0.3*b3*max(0, sqrt(b1))
+	return b1 + 1.8*b2 + 0.15*b3#*max(0, sqrt(b1))
 
 func noise_equation(x: float, y: float) -> float:
 	var base := sin(x/5) + 0.05*sin(x/7+.4) + 0.05*sin(x/1.4+.8) + 0.4*sin(y/3) \
