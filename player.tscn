@@ -79,7 +79,7 @@ script = ExtResource("1_4flbx")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 
 [node name="SpringArm" type="SpringArm3D" parent="Q"]
-spring_length = 3.0
+spring_length = 5.0
 
 [node name="Cam" type="Node3D" parent="Q/SpringArm"]
 

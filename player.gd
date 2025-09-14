@@ -9,7 +9,7 @@ const HIGH_FRIC := 0.005
 const LOW_FRIC := 0.1
 
 const RELEASE_BOOST_FLAT := 0.4
-const RELEASE_BOOST_RATIO := 0.2
+const RELEASE_BOOST_RATIO := 0.1
 const RELEASE_LIFT := 1.0 # dotted with up vel
 
 var is_heavy := false
@@ -45,13 +45,13 @@ func _input(event: InputEvent) -> void:
 	const rl := RELEASE_LIFT
 	if Input.is_action_just_pressed("heavy"):
 		is_heavy = true
-		#velocity *= (1.0 - rbr)
-		#velocity *= velocity.length() / (velocity.length() + rbf)
+		velocity *= (1.0 - rbr)
+		velocity *= velocity.length() / (velocity.length() + rbf)
 	if Input.is_action_just_released("heavy"):
 		is_heavy = false
-		#velocity *= 1/(1-rbr)
-		#velocity *= (velocity.length() + rbf) / velocity.length()
-		#velocity += Vector3.UP * max(0, Vector3.UP.dot(velocity.normalized())) * rl
+		velocity *= 1/(1-rbr)
+		velocity *= (velocity.length() + rbf) / velocity.length()
+		velocity += Vector3.UP * max(0, Vector3.UP.dot(velocity.normalized())) * rl
 
 
 #### Physics ####
