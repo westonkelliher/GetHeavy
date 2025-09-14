@@ -51,7 +51,7 @@ theme_override_font_sizes/font_size = 40
 text = "Restart"
 
 [node name="Player" parent="." instance=ExtResource("4_aqk2v")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 50.9646, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3.65239, 0)
 
 [node name="Terrain" parent="." instance=ExtResource("4_036b0")]
 

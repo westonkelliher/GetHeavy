@@ -1,6 +1,15 @@
-[gd_scene load_steps=15 format=3 uid="uid://kwdxei0hwcaj"]
+[gd_scene load_steps=19 format=3 uid="uid://kwdxei0hwcaj"]
 
 [ext_resource type="Script" uid="uid://bwx6oedgihcku" path="res://player.gd" id="1_4flbx"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1jxqw"]
+transparency = 1
+albedo_color = Color(1, 0.584314, 0, 0.545098)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_dw050"]
+material = SubResource("StandardMaterial3D_1jxqw")
+radius = 0.2
+height = 0.4
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sweqy"]
 transparency = 1
@@ -47,6 +56,15 @@ material = SubResource("StandardMaterial3D_i3pqv")
 radius = 0.02
 height = 0.05
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2hs0m"]
+transparency = 1
+albedo_color = Color(1, 0.584314, 0, 0.545098)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_1jxqw"]
+material = SubResource("StandardMaterial3D_2hs0m")
+radius = 0.4
+height = 0.8
+
 [sub_resource type="SphereShape3D" id="SphereShape3D_4flbx"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_4flbx"]
@@ -61,9 +79,18 @@ script = ExtResource("1_4flbx")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 
 [node name="SpringArm" type="SpringArm3D" parent="Q"]
-spring_length = 5.0
+spring_length = 3.0
 
 [node name="Cam" type="Node3D" parent="Q/SpringArm"]
+
+[node name="MoCo" type="MeshInstance3D" parent="Q"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.596973, -0.282872, 0)
+mesh = SubResource("CapsuleMesh_dw050")
+skeleton = NodePath("../..")
+
+[node name="Timer" type="Timer" parent="Q/MoCo"]
+wait_time = 0.1
+one_shot = true
 
 [node name="Debug" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
@@ -101,6 +128,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.165115, 0, 0.105529)
 mesh = SubResource("CapsuleMesh_hqtel")
 skeleton = NodePath("../..")
 
+[node name="G" type="MeshInstance3D" parent="Debug"]
+mesh = SubResource("CapsuleMesh_1jxqw")
+skeleton = NodePath("../..")
+
 [node name="Shape" type="CollisionShape3D" parent="."]
 shape = SubResource("SphereShape3D_4flbx")
 
@@ -110,5 +141,13 @@ visible = false
 mesh = SubResource("SphereMesh_4flbx")
 
 [node name="Cast" type="ShapeCast3D" parent="."]
+enabled = false
 shape = SubResource("SphereShape3D_onrkg")
 target_position = Vector3(0, 0.2, -0.4)
+
+[node name="SnapCast" type="ShapeCast3D" parent="."]
+enabled = false
+shape = SubResource("SphereShape3D_onrkg")
+target_position = Vector3(0, 0.2, -0.4)
+
+[connection signal="timeout" from="Q/MoCo/Timer" to="." method="_on_moco_timeout"]

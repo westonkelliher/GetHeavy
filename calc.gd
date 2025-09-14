@@ -21,6 +21,30 @@ func get_ground_y(world_x: float, world_z: float, exclude := [player], max_heigh
 	var hit := space.intersect_ray(params)   # single‑arg call in 4.x  :contentReference[oaicite:0]{index=0}
 	return hit.position.y if hit else 0.0    # put the player a small margin above
 
+func get_ground_normal(world_x: float, world_z: float) -> Vector3:
+	var py: float = get_ground_y(world_x, world_z)
+	var p: Vector3 = Vector3(world_x, py, world_z)
+	#print(p)
+	# a
+	var thetq: Vector3 = Vector3.FORWARD * 0.4
+	var a: Vector3 = p + thetq
+	a.y = get_ground_y(a.x, a.z)
+	# b
+	thetq = thetq.rotated(Vector3.UP, PI*2/3)
+	var b: Vector3 = p + thetq
+	b.y = get_ground_y(b.x, b.z)
+	# c
+	thetq = thetq.rotated(Vector3.UP, PI*2/3)
+	var c: Vector3 = p + thetq
+	c.y = get_ground_y(c.x, c.z)
+	# upward normal of the plane
+	var tang_norm: Vector3 = (b-a).cross(c-a).normalized()
+	if tang_norm.y < 0:
+		tang_norm = -tang_norm
+	# debug
+	player.set_debug_points([a, b, c, p])
+	return tang_norm
+
 # normalized vector tangent to ground surface in the most downward direction
 func get_downward_vector(world_x: float, world_z: float) -> Vector3:
 	var q1: Vector3 = _get_downward_vector(world_x, world_z, 0.15, 0)
@@ -54,8 +78,6 @@ func _get_downward_vector(world_x: float, world_z: float, non_limit_dist: float,
 	if dot > 0.999:
 		return Vector3.ZERO
 	var down_proj: Vector3 = Vector3.DOWN - dot * tang_norm
-	# debug
-	player.set_debug_points([a, b, c, p])
 	#
 	#print('--- ' + str(down_proj.normalized()) + ' ---')
 	return down_proj.normalized()

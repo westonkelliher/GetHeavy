@@ -14,6 +14,16 @@ const RELEASE_LIFT := 1.0 # dotted with up vel
 
 var is_heavy := false
 var grounded := false
+var GROUND_CAST_ADJUST := Vector3(0,-0.1,0) # maybe don't need
+
+# if the leftover component of velocity is ever larger than the below number after 
+# collision, then we should continue calculating collision again in the same frame until
+# the remainder of velocity is less than this number
+# TODO: when implementing this, make sure to go along the normal this amount so that we 
+# don't infinite loop on an immediate collision
+var DOUBLE_CALC_COLLISION_DISTANCE := 0.45
+
+# TODO: decide on angle where we don't lose any speed when going through a bend
 
 func _ready() -> void:
 	print('ready')
@@ -22,10 +32,10 @@ func get_cam_node() -> Node3D:
 	return $Q/SpringArm/Cam
 
 func _process(delta: float) -> void:
-	# set debug ray pointing down gradient
-	#print(global_position)
-	#$Debug/Ray.global_position = Vector3($M.global_position.x, .3, $M.global_position.z)
-	pass
+	if grounded:
+		$Debug/G.mesh.material.albedo_color = Color(0.7, 0.7, 0.2, 0.4)
+	else:
+		$Debug/G.mesh.material.albedo_color = Color(0.2, 0.2, 0.7, 0.7)
 
 
 
@@ -35,43 +45,112 @@ func _input(event: InputEvent) -> void:
 	const rl := RELEASE_LIFT
 	if Input.is_action_just_pressed("heavy"):
 		is_heavy = true
-		velocity *= (1.0 - rbr)
-		velocity *= velocity.length() / (velocity.length() + rbf)
+		#velocity *= (1.0 - rbr)
+		#velocity *= velocity.length() / (velocity.length() + rbf)
 	if Input.is_action_just_released("heavy"):
 		is_heavy = false
-		velocity *= 1/(1-rbr)
-		velocity *= (velocity.length() + rbf) / velocity.length()
-		velocity += Vector3.UP * max(0, Vector3.UP.dot(velocity.normalized())) * rl
+		#velocity *= 1/(1-rbr)
+		#velocity *= (velocity.length() + rbf) / velocity.length()
+		#velocity += Vector3.UP * max(0, Vector3.UP.dot(velocity.normalized())) * rl
 
 
 #### Physics ####
 func _physics_process(delta: float) -> void:
-	#velocity = Vector3.FORWARD
-	# TODO: handle momentum change when hitting the floor
-	phys_snap_help(delta)
-	#self.floor_snap_length = 0.1
+	#if velocity.length() > 3:
+		#velocity *= 0.95
 	phys_grav(delta)
 	phys_sloping(delta) # lift a bit if we go convex
-	var vy := velocity.y
-	move_and_slide()
-	velocity.y = vy
-	#if is_on_floor():
-		#apply_floor_snap()
+	#var vy := velocity.y
+	phys_move_and_slide(delta)
+	#velocity.y = vy
 	phys_friction(delta)
 
+# TODO: do the collision update when we change targ position or not until next frame?
+func phys_move_and_slide(delta: float) -> void:
+	$Cast.target_position = velocity*delta
+	$Cast.force_shapecast_update() # the shapecast is not "enabled" so this is the only callsite
 
-#func phys_move_and_slide(delta: float) -> void:
-	#$Cast.target_position = velocity
-	#if $Cast.is_colliding():
-		
+	# didnt hit anything
+	if not $Cast.is_colliding():
+		position += velocity*delta
+		# check if we're grounded
+		$SnapCast.target_position = Vector3.UP*0.1
+		$SnapCast.target_position = -$SnapCast.position*1.1
+		$SnapCast.force_shapecast_update()
+		if not $SnapCast.is_colliding():
+			grounded=false
+		return
+	var c_point: Vector3 = $Cast.get_collision_point(0)
+	var c_fraction: float = $Cast.get_closest_collision_unsafe_fraction()
+	$Cast.target_position = $Cast.target_position*c_fraction
+	$Cast.force_shapecast_update()
+	if $Cast.is_colliding():
+		c_point = $Cast.get_collision_point(0)
+	
+	var c_normal: Vector3 = Calc.get_ground_normal(c_point.x, c_point.z)
+	$Debug/Ray.target_position = c_normal
+	# see if any of the purported collisions are non-gay
+	#var n: int = $Cast.get_collision_count()
+	#if n > 1:
+		#print("BULLSHIT > 1")
+		## godot can't seem to figure out how to not shit the bed in this case so I'll manually 
+		## calculate the collision normal and fraction
+		#$Q/MoCo.mesh.material.albedo_color = Color(1.0, 0.0, 0.0, 0.9)
+		#$Q/MoCo/Timer.start(0.2)
+	#for i in range(n):
+		#var c_n: Vector3 = $Cast.get_collision_normal(0)
+		#if velocity.dot(c_n) < 0:
+			#if c_normal != Vector3.ZERO:
+				#print("MULTIPLE DOT+ COLLISIONS")
+				#c_normal = Calc.get_ground_normal(position.x, position.y) # TODO: get normal at collision, not at here
+				#break
+			#c_normal = c_n
+	#if c_normal == Vector3.ZERO:
+		## ignoring gay collisions
+		#position += velocity*delta
+		#return
+		##phys_snap_to_surface()
+	var parallel := c_normal * velocity.dot(c_normal)
+	var perpendicular := velocity - parallel # TODO: lose less vel?
+	#
+	var pre_c_v_component := velocity*c_fraction*delta
+	var post_c_v_component := perpendicular*(1-c_fraction)*delta
+	#
+	position += pre_c_v_component
+	var remaining_dist := post_c_v_component.length()
+	var dccd := DOUBLE_CALC_COLLISION_DISTANCE
+	while remaining_dist > dccd:
+		print("VELOCITY REMAINDER IS LARGE")
+		# TODO: we could make this recursive
+		# NOTE: that the difference rn is we don't recalculate collisions here, we just stick to the floor
+		position += perpendicular*dccd
+		remaining_dist -= dccd
+		c_normal = Calc.get_ground_normal(position.x, position.z)
+		phys_snap_to_surface(c_normal)
+		parallel = c_normal * post_c_v_component.dot(c_normal)
+		perpendicular = post_c_v_component - parallel # TODO: lose less vel?
+		post_c_v_component = remaining_dist * perpendicular.normalized()
+		# TODO: debug pausing
+	position += post_c_v_component
+		# prevent ourselves from phasing into the floor on concavities
+	phys_snap_to_surface(c_normal)
+	var vn := perpendicular.normalized()
+	velocity = vn * vn.dot(velocity)
+		# TODO: to dot or not to dot? for now sqrt()
+	grounded=true
 
-func phys_snap_help(delta: float) -> void:
-	if is_heavy:
-		self.floor_snap_length = 0.4
-	elif velocity.normalized().dot(Vector3.DOWN) > 0.3:
-		self.floor_snap_length = 0.05
-	else:
-		self.floor_snap_length = 0.0
+# TODO: calculate current_normal if last_normal isnt good enough
+func phys_snap_to_surface(last_normal: Vector3) -> void:
+	# TODO: in tight spots, we could back up the starting point until the point 
+	#       where we don't start with a collision
+	$SnapCast.position = last_normal * DOUBLE_CALC_COLLISION_DISTANCE*4.0
+	$SnapCast.target_position = -$SnapCast.position
+	$SnapCast.force_shapecast_update()
+	if $SnapCast.is_colliding():
+		var c_fraction: float = $SnapCast.get_closest_collision_safe_fraction()
+		position = $SnapCast.global_position  + $SnapCast.target_position*c_fraction
+		#print('snap ' + str(randi())[0])
+	
 
 func phys_sloping(delta: float) -> void:
 	var v := velocity
@@ -91,18 +170,17 @@ func phys_grav(delta: float) -> void:
 	var grav := LOW_GRAV
 	if is_heavy:
 		grav = HIGH_GRAV
-	if not is_on_floor():
+	if not grounded:
 		velocity += Vector3.DOWN*grav*delta
 	else:
 		var downhill := Calc.get_downward_vector(global_position.x, global_position.z)
 		if downhill.length() == 0:
 			return
 		var dh_acc := downhill * downhill.dot(Vector3.DOWN) * grav
-		$Debug/Ray.target_position = dh_acc * 0.5/sqrt(dh_acc.length())
-		print('---')
-		print(velocity.y)
+		#print('---')
+		#print(velocity.y)
 		velocity += dh_acc * delta
-		print(velocity.y)
+		#print(velocity.y)
 
 func phys_friction(delta: float) -> void:
 	var fric := LOW_FRIC
@@ -119,3 +197,7 @@ func set_debug_points(a: Array) -> void:
 		$Debug/Marks.get_child(i).global_position = a[i]
 		#print($Debug/Marks/Q1.position)
 		#print($Debug/Marks/Q1.global_position)
+
+
+func _on_moco_timeout() -> void:
+	$Q/MoCo.mesh.material.albedo_color = Color(0.0, 1.0, 0.0, 0.1)
