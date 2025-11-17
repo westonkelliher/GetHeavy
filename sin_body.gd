@@ -46,33 +46,36 @@ func noise_equation(x: float, y: float) -> float:
 
 
 func build_mesh(map_data: PackedFloat32Array) -> void:
-	var vertices := height_map_to_vectors(map_data)
-	var normals := height_map_to_normals(map_data)
+	#var vertices := height_map_to_vectors(map_data)
+	#var normals := height_map_to_normals(map_data)
 	#
-	#var arr_mesh := ArrayMesh.new()
-	var arrays := []
-	arrays.resize(Mesh.ARRAY_MAX)
-	arrays[Mesh.ARRAY_VERTEX] = vertices
-	arrays[Mesh.ARRAY_NORMAL] = normals
+	#
+	var arrays := build_mesh_arrays(map_data)#[]
+	#arrays.resize(Mesh.ARRAY_MAX)
+	#arrays[Mesh.ARRAY_VERTEX] = vertices
+	#arrays[Mesh.ARRAY_NORMAL] = normals
 	# Create the Mesh.
-	$Mesh.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-	#var meshIns := MeshInstance3D.new()
-	#meshIns.mesh = arr_mesh
-	#add_child(meshIns)
+	var arr_mesh := ArrayMesh.new()
+	arr_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	var meshIns := MeshInstance3D.new()
+	meshIns.mesh = arr_mesh
+	add_child(meshIns)
 	#return arr_mesh
 
 
 func build_mesh_arrays(heights: PackedFloat32Array) -> Array:
-	var arrays := []
-	arrays.resize(Mesh.ARRAY_MAX)
-	return arrays
-
-# 5 vectors (2 triangles) per square
-func height_map_to_vectors(heights: PackedFloat32Array) -> PackedVector3Array:
-	var vecs := PackedVector3Array()
+	var vertices := PackedVector3Array()
+	var normals := PackedVector3Array()
+	var colors := PackedColorArray()
+	var green1 := Color(0.5, 1.0, 0.5, 1.0)
+	var green2 := Color(0.6, 0.9, 0.5, 1.0)
 	var h_i := 0
 	for z in range(SIZE.y-1):
 		for x in range(SIZE.x-1): # I'm assuming x-major order
+			var color := green1
+			if (x%2 == z%2):
+				color = green2
+			#
 			var vx := x-16
 			var vz := z-16
 			var h1 := get_height(x,z)
@@ -83,44 +86,42 @@ func height_map_to_vectors(heights: PackedFloat32Array) -> PackedVector3Array:
 			var v3 := Vector3(vx, h3-MESH_OFFSET_Y, vz+1)
 			var h4 := get_height(x+1,z+1)
 			var v4 := Vector3(vx+1, h4-MESH_OFFSET_Y, vz+1)
+			#
 			h_i += 1
-			vecs.push_back(v1)
-			vecs.push_back(v2)
-			vecs.push_back(v3)
-			vecs.push_back(v4)
-			vecs.push_back(v3)
-			vecs.push_back(v2)
-	return vecs
-
-func height_map_to_normals(heights: PackedFloat32Array) -> PackedVector3Array:
-	var vecs := PackedVector3Array()
-	var h_i := 0
-	for z in range(SIZE.y-1):
-		for x in range(SIZE.x-1): # I'm assuming x-major order
-			var h1 := get_height(x,z)
-			var v1 := Vector3(x, h1-MESH_OFFSET_Y, z)
-			var h2 := get_height(x+1,z)
-			var v2 := Vector3(x+1, h2-MESH_OFFSET_Y, z)
-			var h3 := get_height(x,z+1)
-			var v3 := Vector3(x, h3-MESH_OFFSET_Y, z+1)
-			var h4 := get_height(x+1,z+1)
-			var v4 := Vector3(x+1, h4-MESH_OFFSET_Y, z+1)
 			#
 			var n123 := (v1-v2).cross(v3-v1)
 			var n432 := (v4-v3).cross(v2-v4)
 			#
-			h_i += 1
-			vecs.push_back(n123)
-			vecs.push_back(n123)
-			vecs.push_back(n123)
-			vecs.push_back(Vector3.UP)
-			vecs.push_back(n432)
-			vecs.push_back(n432)
-	return vecs
+			vertices.push_back(v1)
+			vertices.push_back(v2)
+			vertices.push_back(v3)
+			vertices.push_back(v4)
+			vertices.push_back(v3)
+			vertices.push_back(v2)
+			#
+			normals.push_back(n123)
+			normals.push_back(n123)
+			normals.push_back(n123)
+			normals.push_back(Vector3.UP)
+			normals.push_back(n432)
+			normals.push_back(n432)
+			#
+			colors.push_back(color)
+			colors.push_back(color)
+			colors.push_back(color)
+			colors.push_back(color)
+			colors.push_back(color)
+			colors.push_back(color)
+			#
+	#
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = vertices
+	arrays[Mesh.ARRAY_NORMAL] = normals
+	arrays[Mesh.ARRAY_COLOR] = colors
+	#
+	return arrays
 
-#
-#
-#
 
 func get_height(x: int, y: int) -> float:
 	return $Shape.shape.map_data[y*SIZE.x + x]
