@@ -8,7 +8,7 @@ const WIDTH := 32
 const SIZE: Vector2i = Vector2i(WIDTH+1, WIDTH+1)
 const STITCH_DIST: int = 10
 #
-const MESH_OFFSET_Y := 0.01
+const MESH_OFFSET_Y := 0
 
 func _ready() -> void:
 	$Shape.shape = build_collision_shape(position.x, position.z)
@@ -56,7 +56,10 @@ func build_mesh(map_data: PackedFloat32Array) -> void:
 	#arrays[Mesh.ARRAY_NORMAL] = normals
 	# Create the Mesh.
 	var arr_mesh := ArrayMesh.new()
+	var material := StandardMaterial3D.new()
+	material.vertex_color_use_as_albedo = true
 	arr_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	arr_mesh.surface_set_material(0, material)
 	var meshIns := MeshInstance3D.new()
 	meshIns.mesh = arr_mesh
 	add_child(meshIns)
@@ -67,8 +70,8 @@ func build_mesh_arrays(heights: PackedFloat32Array) -> Array:
 	var vertices := PackedVector3Array()
 	var normals := PackedVector3Array()
 	var colors := PackedColorArray()
-	var green1 := Color(0.5, 1.0, 0.5, 1.0)
-	var green2 := Color(0.6, 0.9, 0.5, 1.0)
+	var green1 := Color(0.03, 0.94, 0.03)
+	var green2 := Color(0.0, 0.60, 0.0)
 	var h_i := 0
 	for z in range(SIZE.y-1):
 		for x in range(SIZE.x-1): # I'm assuming x-major order
@@ -102,9 +105,12 @@ func build_mesh_arrays(heights: PackedFloat32Array) -> Array:
 			normals.push_back(n123)
 			normals.push_back(n123)
 			normals.push_back(n123)
-			normals.push_back(Vector3.UP)
-			normals.push_back(n432)
-			normals.push_back(n432)
+			normals.push_back(n123)
+			normals.push_back(n123)
+			normals.push_back(n123)
+			#normals.push_back(n432)
+			#normals.push_back(n432)
+			#normals.push_back(n432)
 			#
 			colors.push_back(color)
 			colors.push_back(color)
