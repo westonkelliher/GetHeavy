@@ -26,7 +26,8 @@ var DOUBLE_CALC_COLLISION_DISTANCE := 0.45
 # TODO: decide on angle where we don't lose any speed when going through a bend
 
 func _ready() -> void:
-	print('ready')
+	pass
+	#print('player ready')
 
 func get_cam_node() -> Node3D:
 	return $Q/SpringArm/Cam
@@ -92,7 +93,6 @@ func phys_move_and_slide(delta: float) -> void:
 	# see if any of the purported collisions are non-gay
 	#var n: int = $Cast.get_collision_count()
 	#if n > 1:
-		#print("BULLSHIT > 1")
 		## godot can't seem to figure out how to not shit the bed in this case so I'll manually 
 		## calculate the collision normal and fraction
 		#$Q/MoCo.mesh.material.albedo_color = Color(1.0, 0.0, 0.0, 0.9)
@@ -101,7 +101,6 @@ func phys_move_and_slide(delta: float) -> void:
 		#var c_n: Vector3 = $Cast.get_collision_normal(0)
 		#if velocity.dot(c_n) < 0:
 			#if c_normal != Vector3.ZERO:
-				#print("MULTIPLE DOT+ COLLISIONS")
 				#c_normal = Calc.get_ground_normal(position.x, position.y) # TODO: get normal at collision, not at here
 				#break
 			#c_normal = c_n
@@ -120,7 +119,7 @@ func phys_move_and_slide(delta: float) -> void:
 	var remaining_dist := post_c_v_component.length()
 	var dccd := DOUBLE_CALC_COLLISION_DISTANCE
 	while remaining_dist > dccd:
-		print("VELOCITY REMAINDER IS LARGE")
+		#print("VELOCITY REMAINDER IS LARGE")
 		# TODO: we could make this recursive
 		# NOTE: that the difference rn is we don't recalculate collisions here, we just stick to the floor
 		position += perpendicular*dccd
@@ -149,7 +148,6 @@ func phys_snap_to_surface(last_normal: Vector3) -> void:
 	if $SnapCast.is_colliding():
 		var c_fraction: float = $SnapCast.get_closest_collision_safe_fraction()
 		position = $SnapCast.global_position  + $SnapCast.target_position*c_fraction
-		#print('snap ' + str(randi())[0])
 	
 
 func phys_sloping(delta: float) -> void:
@@ -177,10 +175,7 @@ func phys_grav(delta: float) -> void:
 		if downhill.length() == 0:
 			return
 		var dh_acc := downhill * downhill.dot(Vector3.DOWN) * grav
-		#print('---')
-		#print(velocity.y)
 		velocity += dh_acc * delta
-		#print(velocity.y)
 
 func phys_friction(delta: float) -> void:
 	var fric := LOW_FRIC
@@ -195,8 +190,6 @@ func phys_friction(delta: float) -> void:
 func set_debug_points(a: Array) -> void:
 	for i in range(len(a)):
 		$Debug/Marks.get_child(i).global_position = a[i]
-		#print($Debug/Marks/Q1.position)
-		#print($Debug/Marks/Q1.global_position)
 
 
 func _on_moco_timeout() -> void:

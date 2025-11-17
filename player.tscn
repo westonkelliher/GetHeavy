@@ -62,8 +62,7 @@ albedo_color = Color(1, 0.584314, 0, 0.545098)
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_1jxqw"]
 material = SubResource("StandardMaterial3D_2hs0m")
-radius = 0.4
-height = 0.8
+height = 1.0
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_4flbx"]
 
@@ -85,6 +84,7 @@ spring_length = 5.0
 
 [node name="MoCo" type="MeshInstance3D" parent="Q"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.596973, -0.282872, 0)
+visible = false
 mesh = SubResource("CapsuleMesh_dw050")
 skeleton = NodePath("../..")
 
@@ -103,6 +103,7 @@ target_position = Vector3(0, 0, -1)
 target_position = Vector3(0, 0, -1)
 
 [node name="C" type="MeshInstance3D" parent="Debug/Ray2"]
+visible = false
 mesh = SubResource("CapsuleMesh_2hs0m")
 skeleton = NodePath("../..")
 
@@ -129,6 +130,7 @@ mesh = SubResource("CapsuleMesh_hqtel")
 skeleton = NodePath("../..")
 
 [node name="G" type="MeshInstance3D" parent="Debug"]
+visible = false
 mesh = SubResource("CapsuleMesh_1jxqw")
 skeleton = NodePath("../..")
 
@@ -136,8 +138,6 @@ skeleton = NodePath("../..")
 shape = SubResource("SphereShape3D_4flbx")
 
 [node name="Mesh" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-visible = false
 mesh = SubResource("SphereMesh_4flbx")
 
 [node name="Cast" type="ShapeCast3D" parent="."]

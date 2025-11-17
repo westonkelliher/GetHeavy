@@ -32,7 +32,7 @@ func start_world() -> void:
 	#await $HeightFloor.terrain_ready
 	$Terrain.build_terrain()
 	var p: Vector3 = $Player.position
-	print(Calc.get_ground_y(p.x, p.z, [$Player.get_rid()]))
+	#print(Calc.get_ground_y(p.x, p.z, [$Player.get_rid()]))
 	$Player.position.y = Calc.get_ground_y(p.x, p.z, [$Player.get_rid()]) + 2.0
-	print($Player.position)
-	print($Player.global_position)
+	#print($Player.position)
+	#print($Player.global_position)
