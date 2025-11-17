@@ -16,6 +16,9 @@ var is_heavy := false
 var grounded := false
 var GROUND_CAST_ADJUST := Vector3(0,-0.1,0) # maybe don't need
 
+var target_scale := 1.0
+var current_scale := 1.0
+
 # if the leftover component of velocity is ever larger than the below number after 
 # collision, then we should continue calculating collision again in the same frame until
 # the remainder of velocity is less than this number
@@ -25,14 +28,22 @@ var DOUBLE_CALC_COLLISION_DISTANCE := 0.45
 
 # TODO: decide on angle where we don't lose any speed when going through a bend
 
+var saved_albedo := Vector3(0,0,0)
+
 func _ready() -> void:
-	pass
+	var c: Color = $Mesh.mesh.material.albedo_color
+	saved_albedo = Vector3(c.a, c.g, c.b)
 	#print('player ready')
 
 func get_cam_node() -> Node3D:
 	return $Q/SpringArm/Cam
 
 func _process(delta: float) -> void:
+	var s := current_scale
+	$Mesh.scale = Vector3(s, s, s)
+	#var calc_c := saved_albedo - (1-s)*Vector3.ONE
+	var calc_c := saved_albedo.move_toward(Vector3(0.1, 0.1, 0.1), sqrt(1-s))
+	$Mesh.mesh.material.albedo_color = Color(calc_c.x, calc_c.y, calc_c.z)
 	if grounded:
 		$Debug/G.mesh.material.albedo_color = Color(0.7, 0.7, 0.2, 0.4)
 	else:
@@ -48,23 +59,35 @@ func _input(event: InputEvent) -> void:
 		is_heavy = true
 		velocity *= (1.0 - rbr)
 		velocity *= velocity.length() / (velocity.length() + rbf)
+		target_scale = 0.75
+		var s := target_scale
+		$Shape.shape.radius = s/2
+		$Cast.shape.radius = s/2
 	if Input.is_action_just_released("heavy"):
 		is_heavy = false
 		velocity *= 1/(1-rbr)
 		velocity *= (velocity.length() + rbf) / velocity.length()
 		velocity += Vector3.UP * max(0, Vector3.UP.dot(velocity.normalized())) * rl
+		target_scale = 1.0
+		var s := target_scale
+		$Shape.shape.radius = s/2
+		$Cast.shape.radius = s/2
 
 
 #### Physics ####
 func _physics_process(delta: float) -> void:
 	#if velocity.length() > 3:
 		#velocity *= 0.95
+	#set_scale_size(current_scale)
 	phys_grav(delta)
 	phys_sloping(delta) # lift a bit if we go convex
 	#var vy := velocity.y
 	phys_move_and_slide(delta)
 	#velocity.y = vy
 	phys_friction(delta)
+	current_scale = move_toward(current_scale, target_scale, 2.0*delta)
+	#print(current_scale)
+	
 
 # TODO: do the collision update when we change targ position or not until next frame?
 func phys_move_and_slide(delta: float) -> void:
@@ -185,6 +208,12 @@ func phys_friction(delta: float) -> void:
 	velocity *= q
 
 
+### Helper ###
+
+#func set_scale_size(s: int) -> void:
+	##$Shape.shape.radius = s/2
+	##$Cast.shape.radius = s/2
+	#$Mesh.scale = Vector3(s, s, s)
 
 #### Debug ####
 func set_debug_points(a: Array) -> void:

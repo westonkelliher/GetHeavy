@@ -70,8 +70,8 @@ func build_mesh_arrays(heights: PackedFloat32Array) -> Array:
 	var vertices := PackedVector3Array()
 	var normals := PackedVector3Array()
 	var colors := PackedColorArray()
-	var green1 := Color(0.03, 0.94, 0.03)
-	var green2 := Color(0.0, 0.60, 0.0)
+	var green1 := Color(0.01, 0.94, 0.01)
+	var green2 := Color(0.005, 0.60, 0.005)
 	var h_i := 0
 	for z in range(SIZE.y-1):
 		for x in range(SIZE.x-1): # I'm assuming x-major order
