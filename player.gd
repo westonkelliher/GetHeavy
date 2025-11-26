@@ -3,7 +3,7 @@ extends CharacterBody3D
 
 
 const HIGH_GRAV := 20.0
-const LOW_GRAV := 5.0
+const LOW_GRAV := 6.5
 
 const HIGH_FRIC := 0.005
 const LOW_FRIC := 0.1
@@ -129,6 +129,7 @@ func phys_move_and_slide(delta: float) -> void:
 	if not c_info.is_colliding:
 		position += velocity*delta
 		# check if we're grounded
+		$SnapCast.position = Vector3.ZERO
 		$SnapCast.target_position = Vector3.UP*0.1
 		$SnapCast.target_position = -$SnapCast.position*1.1
 		$SnapCast.force_shapecast_update()
@@ -175,12 +176,12 @@ func phys_move_and_slide(delta: float) -> void:
 func phys_snap_to_surface(last_normal: Vector3) -> void:
 	# TODO: in tight spots, we could back up the starting point until the point 
 	#       where we don't start with a collision
-	$SnapCast.position = last_normal * DOUBLE_CALC_COLLISION_DISTANCE*4.0
-	$SnapCast.target_position = -$SnapCast.position
+	$SnapCast.position = last_normal * DOUBLE_CALC_COLLISION_DISTANCE*2.0
+	$SnapCast.target_position = -last_normal * DOUBLE_CALC_COLLISION_DISTANCE*2.0
 	$SnapCast.force_shapecast_update()
 	if $SnapCast.is_colliding():
 		var c_fraction: float = $SnapCast.get_closest_collision_safe_fraction()
-		position = $SnapCast.global_position  + $SnapCast.target_position*c_fraction
+		global_position = $SnapCast.global_position  + $SnapCast.target_position*c_fraction
 	
 
 func phys_sloping(delta: float) -> void:
