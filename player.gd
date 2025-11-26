@@ -94,18 +94,39 @@ func _physics_process(delta: float) -> void:
 	phys_friction(delta)
 	current_scale = move_toward(current_scale, target_scale, 2.0*delta)
 	#print(current_scale)
-	
+
+class C_Info:
+	var is_colliding: bool
+	var c_point: Vector3
+	var c_fraction: float
+
+func get_nearest_c_point(check_vec: Vector3) -> C_Info:
+	var c_info: C_Info = C_Info.new()
+	$Cast.target_position = check_vec
+	$Cast.force_shapecast_update() # the shapecast is not "enabled" so this is the only callsite
+	if not $Cast.is_colliding():
+		c_info.is_colliding = false
+		return c_info
+	c_info.is_colliding = true
+	c_info.c_point = $Cast.get_collision_point(0)
+	# ensure we only get the nearest triangle the would be collided with since get_collision_point() isnt ordered
+	c_info.c_fraction = $Cast.get_closest_collision_unsafe_fraction()
+	$Cast.target_position = $Cast.target_position*c_info.c_fraction
+	$Cast.force_shapecast_update()
+	if $Cast.is_colliding():
+		c_info.c_point = $Cast.get_collision_point(0)
+		c_info.c_fraction = $Cast.get_closest_collision_unsafe_fraction() # shouldnt need this but just in case
+	return c_info
+
 
 # TODO: do the collision update when we change targ position or not until next frame?
 func phys_move_and_slide(delta: float) -> void:
-	$Cast.target_position = velocity*delta
-	$Cast.force_shapecast_update() # the shapecast is not "enabled" so this is the only callsite
+	var check_vec := velocity*delta
 
-	# check if we're near ground
-
+	var c_info := get_nearest_c_point(check_vec)
 
 	# didnt hit anything
-	if not $Cast.is_colliding():
+	if not c_info.is_colliding:
 		position += velocity*delta
 		# check if we're grounded
 		$SnapCast.target_position = Vector3.UP*0.1
@@ -114,34 +135,11 @@ func phys_move_and_slide(delta: float) -> void:
 		if not $SnapCast.is_colliding():
 			grounded=false
 		return
-	var c_point: Vector3 = $Cast.get_collision_point(0)
-	var c_fraction: float = $Cast.get_closest_collision_unsafe_fraction()
-	$Cast.target_position = $Cast.target_position*c_fraction
-	$Cast.force_shapecast_update()
-	if $Cast.is_colliding():
-		c_point = $Cast.get_collision_point(0)
 	
+	var c_point := c_info.c_point
+	var c_fraction := c_info.c_fraction
+
 	var c_normal: Vector3 = Calc.get_ground_normal(c_point.x, c_point.z)
-	#$Debug/Ray.target_position = c_normal
-	# see if any of the purported collisions are non-gay
-	#var n: int = $Cast.get_collision_count()
-	#if n > 1:
-		## godot can't seem to figure out how to not shit the bed in this case so I'll manually 
-		## calculate the collision normal and fraction
-		#$Q/MoCo.mesh.material.albedo_color = Color(1.0, 0.0, 0.0, 0.9)
-		#$Q/MoCo/Timer.start(0.2)
-	#for i in range(n):
-		#var c_n: Vector3 = $Cast.get_collision_normal(0)
-		#if velocity.dot(c_n) < 0:
-			#if c_normal != Vector3.ZERO:
-				#c_normal = Calc.get_ground_normal(position.x, position.y) # TODO: get normal at collision, not at here
-				#break
-			#c_normal = c_n
-	#if c_normal == Vector3.ZERO:
-		## ignoring gay collisions
-		#position += velocity*delta
-		#return
-		##phys_snap_to_surface()
 	var parallel := c_normal * velocity.dot(c_normal)
 	var perpendicular := velocity - parallel # TODO: lose less vel?
 	#
@@ -152,7 +150,7 @@ func phys_move_and_slide(delta: float) -> void:
 	var remaining_dist := post_c_v_component.length()
 	var dccd := DOUBLE_CALC_COLLISION_DISTANCE
 	while remaining_dist > dccd:
-		#print("VELOCITY REMAINDER IS LARGE")
+		print("VELOCITY REMAINDER IS LARGE")
 		# TODO: we could make this recursive
 		# NOTE: that the difference rn is we don't recalculate collisions here, we just stick to the floor
 		position += perpendicular*dccd
