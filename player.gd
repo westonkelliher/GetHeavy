@@ -3,7 +3,7 @@ extends CharacterBody3D
 
 
 const HIGH_GRAV := 20.0
-const LOW_GRAV := 5.0
+const LOW_GRAV := 10.0
 
 const HIGH_FRIC := 0.005
 const LOW_FRIC := 0.1
@@ -12,12 +12,18 @@ const RELEASE_BOOST_FLAT := 0.4
 const RELEASE_BOOST_RATIO := 0.1
 const RELEASE_LIFT := 1.0 # dotted with up vel
 
+const MOVE_ACCELERATION := 30.0
+const MAX_MOVE_SPEED := 2.0
+
 var is_heavy := false
 var grounded := false
 var GROUND_CAST_ADJUST := Vector3(0,-0.1,0) # maybe don't need
 
 var target_scale := 1.0
 var current_scale := 1.0
+
+var move_acc := Vector3.ZERO
+var move_vel := Vector3.ZERO
 
 # if the leftover component of velocity is ever larger than the below number after 
 # collision, then we should continue calculating collision again in the same frame until
@@ -38,7 +44,7 @@ func _ready() -> void:
 func get_cam_node() -> Node3D:
 	return $Q/SpringArm/Cam
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	var s := current_scale
 	$Mesh.scale = Vector3(s, s, s)
 	#var calc_c := saved_albedo - (1-s)*Vector3.ONE
@@ -51,7 +57,7 @@ func _process(delta: float) -> void:
 
 
 
-func _input(event: InputEvent) -> void:
+func _input(_event: InputEvent) -> void:
 	const rbf := RELEASE_BOOST_FLAT
 	const rbr := RELEASE_BOOST_RATIO
 	const rl := RELEASE_LIFT
@@ -72,7 +78,31 @@ func _input(event: InputEvent) -> void:
 		var s := target_scale
 		$Shape.shape.radius = s/2
 		$Cast.shape.radius = s/2
+	var acc := Vector3.ZERO
+	if Input.is_action_pressed("move_forward"):
+		acc += Vector3.FORWARD
+	if Input.is_action_pressed("move_backward"):
+		acc -= Vector3.FORWARD
+	if Input.is_action_pressed("move_left"):
+		acc -= Vector3.RIGHT
+	if Input.is_action_pressed("move_right"):
+		acc += Vector3.RIGHT
+	move_acc = calc_move_acc(acc)
 
+
+func calc_move_acc(input_dir: Vector3) -> Vector3:
+	var cam_rot := get_cam_node().global_rotation.y
+	var acc_unit := input_dir.normalized().rotated(Vector3.UP, cam_rot)
+	# dot product with velocity so we don't acc past max move speed
+	# change yaw of acc to match surface slope
+	var slope := Calc.get_ground_slope_in_dir_at(acc_unit.x, acc_unit.z, global_position.x, global_position.z)
+	var acc_right := acc_unit.rotated(Vector3.UP, -PI/2)
+	acc_unit = acc_unit.rotated(acc_right, min(0,slope))
+	var vel_dot := velocity.dot(acc_unit)
+	if vel_dot > MAX_MOVE_SPEED:
+		return Vector3.ZERO
+	$Debug/Ray.target_position = acc_unit * 3
+	return acc_unit * MOVE_ACCELERATION
 
 #### Physics ####
 func _physics_process(delta: float) -> void:
@@ -82,6 +112,7 @@ func _physics_process(delta: float) -> void:
 	phys_grav(delta)
 	phys_sloping(delta) # lift a bit if we go convex
 	#var vy := velocity.y
+	phys_input_acc(delta, move_acc)
 	phys_move_and_slide(delta)
 	#velocity.y = vy
 	phys_friction(delta)
@@ -94,6 +125,9 @@ func phys_move_and_slide(delta: float) -> void:
 	$Cast.target_position = velocity*delta
 	$Cast.force_shapecast_update() # the shapecast is not "enabled" so this is the only callsite
 
+	# check if we're near ground
+
+
 	# didnt hit anything
 	if not $Cast.is_colliding():
 		position += velocity*delta
@@ -103,6 +137,12 @@ func phys_move_and_slide(delta: float) -> void:
 		$SnapCast.force_shapecast_update()
 		if not $SnapCast.is_colliding():
 			grounded=false
+		var speed := velocity.length()
+		if speed > move_acc.length():
+			velocity *= (speed - move_acc.length()) / speed
+			velocity += move_acc*2.0*delta
+		else:
+			velocity += move_acc*delta
 		return
 	var c_point: Vector3 = $Cast.get_collision_point(0)
 	var c_fraction: float = $Cast.get_closest_collision_unsafe_fraction()
@@ -112,7 +152,7 @@ func phys_move_and_slide(delta: float) -> void:
 		c_point = $Cast.get_collision_point(0)
 	
 	var c_normal: Vector3 = Calc.get_ground_normal(c_point.x, c_point.z)
-	$Debug/Ray.target_position = c_normal
+	#$Debug/Ray.target_position = c_normal
 	# see if any of the purported collisions are non-gay
 	#var n: int = $Cast.get_collision_count()
 	#if n > 1:
@@ -158,6 +198,7 @@ func phys_move_and_slide(delta: float) -> void:
 	phys_snap_to_surface(c_normal)
 	var vn := perpendicular.normalized()
 	velocity = vn * vn.dot(velocity)
+	velocity += move_acc*delta
 		# TODO: to dot or not to dot? for now sqrt()
 	grounded=true
 
@@ -207,6 +248,13 @@ func phys_friction(delta: float) -> void:
 	var q := pow(1.0-fric, delta)
 	velocity *= q
 
+
+func phys_input_acc(delta: float, acc: Vector3) -> void:
+	var acc_mag := acc.length()
+	if acc_mag == 0:
+		return
+	var acc_dir := acc.normalized()
+	move_vel += acc_dir * delta
 
 ### Helper ###
 

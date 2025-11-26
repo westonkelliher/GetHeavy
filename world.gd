@@ -2,8 +2,11 @@ class_name World
 extends Node3D
 
 
+func _process(delta: float) -> void:
+	var p: Vector3 = $Player.position
+	$Z1.position = Vector3(roundf(p.x/32)*32, 0, roundf(p.z/32)*32)
 
-#### Mouse Capture #####
+
 #var mouse_captured := false
 func capture_mouse() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)

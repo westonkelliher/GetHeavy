@@ -110,7 +110,7 @@ one_shot = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
 
 [node name="Ray" type="RayCast3D" parent="Debug"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.530375, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.465671, 0)
 target_position = Vector3(0, 0, -1)
 
 [node name="Ray2" type="RayCast3D" parent="Debug"]

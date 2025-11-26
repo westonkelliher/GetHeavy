@@ -1,9 +1,10 @@
-[gd_scene load_steps=8 format=3 uid="uid://c6bcxo8hc140d"]
+[gd_scene load_steps=9 format=3 uid="uid://c6bcxo8hc140d"]
 
 [ext_resource type="Script" uid="uid://bt6p33gc8jgjd" path="res://world.gd" id="1_aqk2v"]
 [ext_resource type="PackedScene" uid="uid://dkebfqxf1ilwp" path="res://my_camera.tscn" id="2_tlwt5"]
-[ext_resource type="PackedScene" uid="uid://dmddvsb2d3rcu" path="res://terrain.tscn" id="4_036b0"]
+[ext_resource type="PackedScene" uid="uid://dmddvsb2d3rcu" path="res://terrain/terrain.tscn" id="4_036b0"]
 [ext_resource type="PackedScene" uid="uid://kwdxei0hwcaj" path="res://player.tscn" id="4_aqk2v"]
+[ext_resource type="PackedScene" uid="uid://dvfuyglwk7vk1" path="res://terrain/zone_mark.tscn" id="5_036b0"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_fj7yv"]
 sky_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
@@ -54,5 +55,7 @@ text = "Restart"
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3.65239, 0)
 
 [node name="Terrain" parent="." instance=ExtResource("4_036b0")]
+
+[node name="Z1" parent="." instance=ExtResource("5_036b0")]
 
 [connection signal="pressed" from="Button" to="." method="_on_button_pressed"]

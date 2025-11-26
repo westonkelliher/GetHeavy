@@ -12,5 +12,5 @@ func build_terrain() -> void:
 	for y in range(-MACRO_WIDTH,MACRO_WIDTH):
 		for x in range(-MACRO_WIDTH,MACRO_WIDTH):
 			var q: SinBody = preload("res://terrain/sin_body.tscn").instantiate()
-			q.position = Vector3(x*32.1, 0, y*32.1)
+			q.position = Vector3(x*32, 0, y*32)
 			add_child(q)
