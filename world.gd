@@ -39,7 +39,7 @@ func _ready() -> void:
 func start_world() -> void:
 	#$HeightFloor.noise_init_heights()#5.0)
 	#await $HeightFloor.terrain_ready
-	$Terrain.build_terrain()
+	$Terrain.build_initial_terrain()
 	var p: Vector3 = $Player.position
 	#print(Calc.get_ground_y(p.x, p.z, [$Player.get_rid()]))
 	$Player.position.y = Calc.get_ground_y(p.x, p.z, [$Player.get_rid()]) + 2.0
@@ -52,9 +52,10 @@ func _update_visible_sinbody(player_pos: Vector3) -> void:
 	var idx := Vector2i(roundi(player_pos.x / SINBODY_SIZE), roundi(player_pos.z / SINBODY_SIZE))
 	if idx == current_chunk_idx and current_chunk:
 		return
-	if current_chunk:
-		current_chunk.visible = false
+	# if current_chunk:
+	# 	current_chunk.visible = false
 	var terrain := $Terrain
+	terrain.generate_chunks_around_index(idx.x, idx.y)
 	if terrain.sinbodies.has(idx):
 		current_chunk = terrain.sinbodies[idx]
 		current_chunk.visible = true

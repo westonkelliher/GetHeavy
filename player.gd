@@ -3,7 +3,7 @@ extends CharacterBody3D
 
 
 const HIGH_GRAV := 20.0
-const LOW_GRAV := 10.0
+const LOW_GRAV := 5.0
 
 const HIGH_FRIC := 0.005
 const LOW_FRIC := 0.1
