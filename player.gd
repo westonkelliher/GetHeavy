@@ -30,7 +30,7 @@ var move_vel := Vector3.ZERO
 # the remainder of velocity is less than this number
 # TODO: when implementing this, make sure to go along the normal this amount so that we 
 # don't infinite loop on an immediate collision
-var DOUBLE_CALC_COLLISION_DISTANCE := 0.45
+var DOUBLE_CALC_COLLISION_DISTANCE := 2.25
 
 # TODO: decide on angle where we don't lose any speed when going through a bend
 
@@ -151,6 +151,7 @@ func phys_move_and_slide(delta: float) -> void:
 	var dccd := DOUBLE_CALC_COLLISION_DISTANCE
 	while remaining_dist > dccd:
 		print("VELOCITY REMAINDER IS LARGE")
+		print("the large vel handler is broken (you just experienced a bug!)")
 		# TODO: we could make this recursive
 		# NOTE: that the difference rn is we don't recalculate collisions here, we just stick to the floor
 		position += perpendicular*dccd
