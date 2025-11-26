@@ -4,6 +4,9 @@ extends Node3D
 
 const MACRO_WIDTH := 3
 
+# hashmap to store sin_bodys / chunks
+var sinbodies: Dictionary = {}
+
 func _ready() -> void:
 	if get_tree().current_scene == self or Engine.is_editor_hint():
 		build_terrain()
@@ -13,4 +16,6 @@ func build_terrain() -> void:
 		for x in range(-MACRO_WIDTH,MACRO_WIDTH):
 			var q: SinBody = preload("res://terrain/sin_body.tscn").instantiate()
 			q.position = Vector3(x*32, 0, y*32)
+			q.visible = false
 			add_child(q)
+			sinbodies[Vector2i(x, y)] = q
