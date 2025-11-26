@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://73ilbnhtiyeh"]
 
-[ext_resource type="Script" uid="uid://dvww27uyavn1w" path="res://sin_body.gd" id="1_7kq0v"]
+[ext_resource type="Script" uid="uid://dvww27uyavn1w" path="res://terrain/sin_body.gd" id="1_7kq0v"]
 
 [sub_resource type="HeightMapShape3D" id="HeightMapShape3D_eb5a3"]
 map_width = 33

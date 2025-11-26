@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://cggyho1wc1osu"]
 
-[ext_resource type="Script" uid="uid://b2q5fw4dan5re" path="res://height_floor.gd" id="1_nt3s1"]
+[ext_resource type="Script" uid="uid://b2q5fw4dan5re" path="res://terrain/height_floor.gd" id="1_nt3s1"]
 [ext_resource type="Material" uid="uid://b4aeadprr7tq3" path="res://assets/height_floor.tres" id="2_ys3id"]
 
 [sub_resource type="HeightMapShape3D" id="HeightMapShape3D_nt3s1"]

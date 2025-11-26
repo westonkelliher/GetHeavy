@@ -2,7 +2,7 @@
 
 extends Node3D
 
-const MACRO_WIDTH := 5
+const MACRO_WIDTH := 3
 
 func _ready() -> void:
 	if get_tree().current_scene == self or Engine.is_editor_hint():
@@ -11,6 +11,6 @@ func _ready() -> void:
 func build_terrain() -> void:
 	for y in range(-MACRO_WIDTH,MACRO_WIDTH):
 		for x in range(-MACRO_WIDTH,MACRO_WIDTH):
-			var q: SinBody = preload("res://sin_body.tscn").instantiate()
-			q.position = Vector3(x*32, 0, y*32)
+			var q: SinBody = preload("res://terrain/sin_body.tscn").instantiate()
+			q.position = Vector3(x*32.1, 0, y*32.1)
 			add_child(q)
